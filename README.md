@@ -1,4 +1,3 @@
-```markdown
 # Text Overlay Image API
 
 This project provides an HTTP API to overlay text onto images with customizations for font size, line height, and placement. The API allows you to create images with text content dynamically.
