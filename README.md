@@ -10,7 +10,7 @@ This project provides an HTTP API to overlay text onto images with customization
 ## API Documentation
 
 ### Endpoint
-`POST /generate`
+`POST https://<your-domain>/generate`
 
 ### Request Body (JSON)
 ```json
