@@ -88,33 +88,6 @@ This project provides an HTTP API to overlay text onto images with customization
 
 ---
 
-## Usage
-
-### Step 1: Start the Server
-Run the Go application to start the server:
-```bash
-go run main.go
-```
-
-### Step 2: Make a Request
-Use a tool like `curl` or Postman to make a POST request:
-```bash
-curl -X POST -H "Content-Type: application/json" \
--d '{
-  "image_url": "https://example.com/sample.png",
-  "contents": [
-    {
-      "text": "Hello, World!",
-      "font_size": 20.0,
-      "rect": [50, 100, 400, 200],
-      "line_height": 1.5
-    }
-  ]
-}' http://localhost:8080/generate --output result.png
-```
-
----
-
 ## Additional Information
 
 ### Fonts
@@ -129,13 +102,10 @@ Use a sample image and payload to generate overlays with text for testing.
 
 ---
 
-## License
-This project is licensed under the MIT License.
-
----
-
 ## Troubleshooting
 
 ### Common Errors
 - **Font Not Found:** Ensure the `Quicksand-Regular.ttf` font file is placed in the correct directory.
 - **Invalid Image URL:** Verify the URL provided for `image_url` is accessible and points to a valid image.
+
+---
