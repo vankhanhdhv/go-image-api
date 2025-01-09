@@ -21,8 +21,8 @@ import (
 type Content struct {
 	Text       string  `json:"text"`
 	FontSize   float64 `json:"font_size"`
-	Rect       [4]int  `json:"rect"`       // [x1, y1, x2, y2]
-	LineHeight float64 `json:"line_height"` // Line height (spacing multiplier)
+	Rect       [4]int  `json:"rect"`
+	LineHeight float64 `json:"line_height"`
 }
 
 type GenerateRequest struct {
@@ -109,19 +109,14 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 		return nil, fmt.Errorf("failed to parse font: %v", err)
 	}
 
-	// Loop through each content
 	for _, content := range req.Contents {
-		// Create font face with specific size
 		fontFace := truetype.NewFace(fontParsed, &truetype.Options{Size: content.FontSize})
 
-		// Define rectangle
 		rect := image.Rect(content.Rect[0], content.Rect[1], content.Rect[2], content.Rect[3])
 
-		// Draw text
 		DrawTextWithLineHeight(rgba, rect, content.Text, fontFace, content.LineHeight, color.White, rect.Dx())
 	}
 
-	// Encode image to PNG
 	var buf bytes.Buffer
 	err = png.Encode(&buf, rgba)
 	if err != nil {
