@@ -107,5 +107,3 @@ Use a sample image and payload to generate overlays with text for testing.
 ### Common Errors
 - **Font Not Found:** Ensure the `Quicksand-Regular.ttf` font file is placed in the correct directory.
 - **Invalid Image URL:** Verify the URL provided for `image_url` is accessible and points to a valid image.
-
----
