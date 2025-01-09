@@ -1,81 +1,143 @@
-Đúng vậy, lỗi xảy ra là do kiểu dữ liệu của bạn khi truyền vào body trong n8n bị sai. Hiện tại, các giá trị như `title_line_height`, `content_line_height`, `title_rect`, và `content_rect` đang được truyền vào dưới dạng chuỗi (`string`), nhưng API của bạn mong đợi các kiểu dữ liệu khác, như `float64` cho line height và `[]int` cho vùng chèn (`rect`).
+```markdown
+# Text Overlay Image API
 
----
+This project provides an HTTP API to overlay text onto images with customizations for font size, line height, and placement. The API allows you to create images with text content dynamically.
 
-### **Hướng dẫn sửa lỗi**
+## Features
+- Accepts an image URL and text content with styling parameters.
+- Allows customization of font size, line height, and text placement.
+- Outputs the generated image as a PNG file.
 
-#### **1. Kiểm tra định dạng dữ liệu**
+## API Documentation
 
-Dưới đây là kiểu dữ liệu mà API của bạn mong đợi cho các tham số:
+### Endpoint
+`POST /generate`
 
-| Tham số                | Kiểu dữ liệu cần thiết       | Ví dụ                             |
-|------------------------|-----------------------------|-----------------------------------|
-| `title_line_height`    | `float64` (số thực)         | `1.8`                             |
-| `content_line_height`  | `float64` (số thực)         | `1.6`                             |
-| `title_rect`           | `[4]int` (mảng số nguyên)   | `[100, 50, 500, 150]`             |
-| `content_rect`         | `[4]int` (mảng số nguyên)   | `[100, 200, 500, 300]`            |
-
----
-
-#### **2. Cập nhật cấu hình n8n**
-
-Trong n8n, bạn cần đảm bảo rằng các giá trị truyền vào body không phải là chuỗi nếu API mong đợi kiểu dữ liệu khác.
-
-**Cách cấu hình trong n8n:**
-
-1. **Kiểm tra giá trị truyền vào từng tham số**:
-   - `title_line_height`: Đảm bảo là số thực, ví dụ: `1.8`.
-   - `content_line_height`: Đảm bảo là số thực, ví dụ: `1.6`.
-   - `title_rect` và `content_rect`: Đảm bảo là mảng số nguyên, ví dụ: `[100, 50, 500, 150]`.
-
-2. **Sửa giá trị trực tiếp trong n8n:**
-   - Với `title_line_height` và `content_line_height`: Loại bỏ dấu ngoặc kép (") nếu có, ví dụ: thay `"1.8"` bằng `1.8`.
-   - Với `title_rect` và `content_rect`: Truyền giá trị theo dạng JSON hợp lệ. Ví dụ:
-     ```
-     [100, 50, 500, 150]
-     ```
-
-3. **Ví dụ cụ thể:**
-   - **Title Line Height**: `1.8`
-   - **Content Line Height**: `1.6`
-   - **Title Rect**: `[100, 50, 500, 150]`
-   - **Content Rect**: `[100, 200, 500, 300]`
-
----
-
-#### **3. Nếu sử dụng n8n với biến động**
-
-Nếu bạn đang sử dụng n8n với dữ liệu biến động (như lấy từ JSON hoặc node trước đó), hãy chắc chắn:
-   - **Kiểu dữ liệu**: Đảm bảo bạn không bao quanh số thực hoặc mảng bằng dấu ngoặc kép `"`.
-   - **Biểu thức động**: Sử dụng biểu thức n8n để parse giá trị đúng kiểu. Ví dụ:
-     ```javascript
-     {{ [100, 50, 500, 150] }}
-     ```
-
----
-
-### **Ví dụ Body Chuẩn**
-
-Dưới đây là một body hợp lệ mà API của bạn mong đợi:
+### Request Body (JSON)
 ```json
 {
-  "image_url": "https://s3.amazonaws.com/i.snag.gy/BhERXe.jpg",
-  "title": "What is SEO?",
-  "content": "Introduction to SEO, its importance, and how it works.",
-  "title_line_height": 1.8,
-  "content_line_height": 1.6,
-  "title_rect": [100, 50, 500, 150],
-  "content_rect": [100, 200, 500, 300],
-  "title_font_size": 60,
-  "content_font_size": 40
+  "image_url": "string",
+  "contents": [
+    {
+      "text": "string",
+      "font_size": "float",
+      "rect": [x1, y1, x2, y2],
+      "line_height": "float"
+    }
+  ]
 }
+```
+
+### Parameters
+| Parameter    | Type     | Description                                                                                     |
+|--------------|----------|-------------------------------------------------------------------------------------------------|
+| `image_url`  | `string` | URL of the base image to be used.                                                              |
+| `contents`   | `array`  | An array of text content objects for overlay.                                                  |
+| `text`       | `string` | The text to overlay on the image.                                                              |
+| `font_size`  | `float`  | The font size for the text (e.g., `12.5`).                                                     |
+| `rect`       | `array`  | A rectangle `[x1, y1, x2, y2]` specifying the text area (top-left and bottom-right coordinates).|
+| `line_height`| `float`  | Line height multiplier for text spacing (e.g., `1.5`).                                         |
+
+### Example Request
+```json
+{
+  "image_url": "https://example.com/sample.png",
+  "contents": [
+    {
+      "text": "Hello, World!",
+      "font_size": 20.0,
+      "rect": [50, 100, 400, 200],
+      "line_height": 1.5
+    }
+  ]
+}
+```
+
+### Example Response
+- **Content-Type:** `image/png`
+- **Headers:** 
+  - `Content-Disposition: attachment; filename="result.png"`
+- The body contains the PNG image data.
+
+### Error Handling
+| HTTP Status Code | Description                          |
+|------------------|--------------------------------------|
+| `400`            | Invalid request body or parameters. |
+| `500`            | Internal server error.              |
+
+---
+
+## Installation
+
+### Prerequisites
+- **Go 1.17+**
+- Install required Go modules:
+  ```bash
+  go get github.com/disintegration/imaging
+  go get github.com/golang/freetype
+  go get golang.org/x/image/font
+  ```
+
+### Setup
+1. Clone the repository.
+2. Place the required font file in `./fonts/Quicksand-Regular.ttf`.
+3. Run the application:
+   ```bash
+   go run main.go
+   ```
+4. The server starts on `http://localhost:8080`.
+
+---
+
+## Usage
+
+### Step 1: Start the Server
+Run the Go application to start the server:
+```bash
+go run main.go
+```
+
+### Step 2: Make a Request
+Use a tool like `curl` or Postman to make a POST request:
+```bash
+curl -X POST -H "Content-Type: application/json" \
+-d '{
+  "image_url": "https://example.com/sample.png",
+  "contents": [
+    {
+      "text": "Hello, World!",
+      "font_size": 20.0,
+      "rect": [50, 100, 400, 200],
+      "line_height": 1.5
+    }
+  ]
+}' http://localhost:8080/generate --output result.png
 ```
 
 ---
 
-### **Kiểm tra lại**
+## Additional Information
 
-1. Sửa body trong n8n theo hướng dẫn trên.
-2. Nhấn **Test Step** để kiểm tra.
+### Fonts
+- The application requires a `.ttf` font file. Place the file in the `./fonts` directory.
+- Modify the path to use a different font.
 
-Nếu vẫn gặp lỗi, vui lòng gửi thông tin log chi tiết hoặc cấu hình n8n để tôi hỗ trợ thêm. 😊
+### Customization
+- Adjust font size, text placement (`rect`), and line height to customize the appearance of the text overlay.
+
+### Example Images
+Use a sample image and payload to generate overlays with text for testing.
+
+---
+
+## License
+This project is licensed under the MIT License.
+
+---
+
+## Troubleshooting
+
+### Common Errors
+- **Font Not Found:** Ensure the `Quicksand-Regular.ttf` font file is placed in the correct directory.
+- **Invalid Image URL:** Verify the URL provided for `image_url` is accessible and points to a valid image.
+```
