@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -23,6 +24,7 @@ type Content struct {
 	FontSize   float64 `json:"font_size"`
 	Rect       [4]int  `json:"rect"`
 	LineHeight float64 `json:"line_height"`
+	Color      string  `json:"color"`
 }
 
 type GenerateRequest struct {
@@ -62,7 +64,31 @@ func DrawTextWithLineHeight(img draw.Image, rect image.Rectangle, text string, f
 	}
 }
 
+func hexToColor(hex string) color.Color {
+	if strings.HasPrefix(hex, "#") {
+		hex = hex[1:]
+	}
+
+	var r, g, b uint8
+	switch len(hex) {
+	case 3:
+		fmt.Sscanf(hex, "%1x%1x%1x", &r, &g, &b)
+		r = r * 17
+		g = g * 17
+		b = b * 17
+	case 6:
+		fmt.Sscanf(hex, "%02x%02x%02x", &r, &g, &b)
+	default:
+		return color.White
+	}
+	return color.RGBA{R: r, G: g, B: b, A: 255}
+}
+
 func WrapText(text string, fontFace font.Face, maxWidth int) string {
+	if len(text) == 0 {
+		return ""
+	}
+
 	var wrappedText string
 	words := strings.Fields(text)
 	currentLine := ""
@@ -92,6 +118,10 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
+	if !strings.HasPrefix(resp.Header.Get("Content-Type"), "image/") {
+		return nil, fmt.Errorf("URL does not point to a valid image")
+	}
+
 	img, err := imaging.Decode(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode image: %v", err)
@@ -99,7 +129,6 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 
 	rgba := imaging.Clone(img)
 
-	// Load font
 	fontBytes, err := os.ReadFile("./fonts/Quicksand-Regular.ttf")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load font: %v", err)
@@ -111,10 +140,9 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 
 	for _, content := range req.Contents {
 		fontFace := truetype.NewFace(fontParsed, &truetype.Options{Size: content.FontSize})
-
 		rect := image.Rect(content.Rect[0], content.Rect[1], content.Rect[2], content.Rect[3])
-
-		DrawTextWithLineHeight(rgba, rect, content.Text, fontFace, content.LineHeight, color.White, rect.Dx())
+		textColor := hexToColor(content.Color)
+		DrawTextWithLineHeight(rgba, rect, content.Text, fontFace, content.LineHeight, textColor, rect.Dx())
 	}
 
 	var buf bytes.Buffer
@@ -134,24 +162,47 @@ func handleGenerateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.ImageURL == "" || !strings.HasPrefix(req.ImageURL, "http") {
+		http.Error(w, "Invalid or missing image_url", http.StatusBadRequest)
+		return
+	}
+
+	for _, content := range req.Contents {
+		if content.FontSize <= 0 || content.LineHeight <= 0 {
+			http.Error(w, "Invalid font size or line height", http.StatusBadRequest)
+			return
+		}
+	}
+
 	imageBytes, err := GenerateImage(req)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error generating image: %v", err), http.StatusInternalServerError)
+		log.Printf("Error generating image: %v", err)
+		http.Error(w, "Error generating image", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "image/png")
-	w.Header().Set("Content-Disposition", "attachment; filename=\"result.png\"")
+	w.Header().Set("Content-Disposition", "inline; filename=\"result.png\"")
 	w.Write(imageBytes)
 }
 
+func recoverMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+			}
+		}()
+		next(w, r)
+	}
+}
+
 func main() {
-	http.HandleFunc("/generate", handleGenerateImage)
+	http.HandleFunc("/generate", recoverMiddleware(handleGenerateImage))
 
 	port := "8080"
 	fmt.Printf("Server is running on port %s\n", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		fmt.Fprintf(os.Stderr, "Error starting server: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Error starting server: %v", err)
 	}
 }
