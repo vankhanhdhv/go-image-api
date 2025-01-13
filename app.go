@@ -208,8 +208,7 @@ func main() {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"message": "Image generated successfully!"}`)
+		handleGenerateImage(w, r)
 	})
 
 	fmt.Println("Server running at http://localhost:8080")
