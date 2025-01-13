@@ -21,7 +21,8 @@ This project provides an HTTP API to overlay text onto images with customization
       "text": "string",
       "font_size": "float",
       "rect": [x1, y1, x2, y2],
-      "line_height": "float"
+      "line_height": "float",
+      "color": "hex"
     }
   ]
 }
@@ -36,6 +37,7 @@ This project provides an HTTP API to overlay text onto images with customization
 | `font_size`  | `float`  | The font size for the text (e.g., `12.5`).                                                     |
 | `rect`       | `array`  | A rectangle `[x1, y1, x2, y2]` specifying the text area (top-left and bottom-right coordinates).|
 | `line_height`| `float`  | Line height multiplier for text spacing (e.g., `1.5`).                                         |
+| `color`      | `hex`    | Hexadecimal color code for the text (e.g., `#FFFFFF`).                                         |
 
 ### Example Request
 ```json
@@ -46,7 +48,8 @@ This project provides an HTTP API to overlay text onto images with customization
       "text": "Hello, World!",
       "font_size": 20.0,
       "rect": [50, 100, 400, 200],
-      "line_height": 1.5
+      "line_height": 1.5,
+      "color": "#000000"
     }
   ]
 }
@@ -54,7 +57,7 @@ This project provides an HTTP API to overlay text onto images with customization
 
 ### Example Response
 - **Content-Type:** `image/png`
-- **Headers:** 
+- **Headers:**
   - `Content-Disposition: attachment; filename="result.png"`
 - The body contains the PNG image data.
 
