@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Overlay Image API</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #0056b3;
+        }
+
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        code {
+            background: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <h1 id="text-overlay-image-api">Text Overlay Image API</h1>
+        <p>This project provides an HTTP API to overlay text onto images with customizations for font size, line height,
+            and placement. The API allows you to create images with text content dynamically.</p>
+        <h2 id="features">Features</h2>
+        <ul>
+            <li>Accepts an image URL and text content with styling parameters.</li>
+            <li>Allows customization of font size, line height, and text placement.</li>
+            <li>Outputs the generated image as a PNG file.</li>
+        </ul>
+        <h2 id="api-documentation">API Documentation</h2>
+        <h3 id="endpoint">Endpoint</h3>
+        <p><code>POST: https://&lt;your-domain&gt;/generate</code></p>
+        <h3 id="request-body-json-">Request Body (JSON)</h3>
+        <pre><code class="lang-json">{
+  <span class="hljs-attr">"image_url"</span>: <span class="hljs-string">"string"</span>,
+  <span class="hljs-attr">"contents"</span>: [
+    {
+      <span class="hljs-attr">"text"</span>: <span class="hljs-string">"string"</span>,
+      <span class="hljs-attr">"font_size"</span>: <span class="hljs-string">"float"</span>,
+      <span class="hljs-attr">"rect"</span>: [x1, y1, x2, y2],
+      <span class="hljs-attr">"line_height"</span>: <span class="hljs-string">"float"</span>,
+      <span class="hljs-attr">"color"</span>: <span class="hljs-string">"hex"</span>
+    }
+  ]
+}
+</code></pre>
+        <h3 id="parameters">Parameters</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>image_url</code></td>
+                    <td><code>string</code></td>
+                    <td>URL of the base image to be used.</td>
+                </tr>
+                <tr>
+                    <td><code>contents</code></td>
+                    <td><code>array</code></td>
+                    <td>An array of text content objects for overlay.</td>
+                </tr>
+                <tr>
+                    <td><code>text</code></td>
+                    <td><code>string</code></td>
+                    <td>The text to overlay on the image.</td>
+                </tr>
+                <tr>
+                    <td><code>font_size</code></td>
+                    <td><code>float</code></td>
+                    <td>The font size for the text (e.g., <code>12.5</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>rect</code></td>
+                    <td><code>array</code></td>
+                    <td>A rectangle <code>[x1, y1, x2, y2]</code> specifying the text area (top-left and bottom-right
+                        coordinates).</td>
+                </tr>
+                <tr>
+                    <td><code>line_height</code></td>
+                    <td><code>float</code></td>
+                    <td>Line height multiplier for text spacing (e.g., <code>1.5</code>).</td>
+                </tr>
+                <tr>
+                    <td><code>color</code></td>
+                    <td><code>hex</code></td>
+                    <td>Hexadecimal color code for the text (e.g., <code>#FFFFFF</code>).</td>
+                </tr>
+            </tbody>
+        </table>
+        <h3 id="example-request">Example Request</h3>
+        <pre><code class="lang-json">{
+  <span class="hljs-attr">"image_url"</span>: <span class="hljs-string">"https://example.com/sample.png"</span>,
+  <span class="hljs-attr">"contents"</span>: [
+    {
+      <span class="hljs-attr">"text"</span>: <span class="hljs-string">"Hello, World!"</span>,
+      <span class="hljs-attr">"font_size"</span>: <span class="hljs-number">20.0</span>,
+      <span class="hljs-attr">"rect"</span>: [<span class="hljs-number">50</span>, <span class="hljs-number">100</span>, <span class="hljs-number">400</span>, <span class="hljs-number">200</span>],
+      <span class="hljs-attr">"line_height"</span>: <span class="hljs-number">1.5</span>,
+      <span class="hljs-attr">"color"</span>: <span class="hljs-string">"#000000"</span>
+    }
+  ]
+}
+</code></pre>
+        <h3 id="example-response">Example Response</h3>
+        <ul>
+            <li><strong>Content-Type:</strong> <code>image/png</code></li>
+            <li><strong>Headers:</strong>
+                <ul>
+                    <li><code>Content-Disposition: attachment; filename=&quot;result.png&quot;</code></li>
+                </ul>
+            </li>
+            <li>The body contains the PNG image data.</li>
+        </ul>
+        <h3 id="error-handling">Error Handling</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>HTTP Status Code</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>400</code></td>
+                    <td>Invalid request body or parameters.</td>
+                </tr>
+                <tr>
+                    <td><code>500</code></td>
+                    <td>Internal server error.</td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <h2 id="installation">Installation</h2>
+        <h3 id="prerequisites">Prerequisites</h3>
+        <ul>
+            <li><strong>Go 1.17+</strong></li>
+            <li>Install required Go modules:
+                <pre><code class="lang-bash"><span class="hljs-built_in">go</span> <span class="hljs-built_in">get</span> github.com/disintegration/imaging
+<span class="hljs-built_in">go</span> <span class="hljs-built_in">get</span> github.com/golang/freetype
+<span class="hljs-built_in">go</span> <span class="hljs-built_in">get</span> golang.org/x/<span class="hljs-built_in">image</span>/<span class="hljs-built_in">font</span>
+</code></pre>
+            </li>
+        </ul>
+        <h3 id="setup">Setup</h3>
+        <ol>
+            <li>Clone the repository.</li>
+            <li>Place the required font file in <code>./fonts/Quicksand-Regular.ttf</code>.</li>
+            <li>Run the application:
+                <pre><code class="lang-bash">go <span class="hljs-keyword">run</span><span class="bash"> main.go</span>
+</code></pre>
+            </li>
+            <li>The server starts on <code>http://localhost:8080</code>.</li>
+        </ol>
+        <hr>
+        <h2 id="additional-information">Additional Information</h2>
+        <h3 id="fonts">Fonts</h3>
+        <ul>
+            <li>The application requires a <code>.ttf</code> font file. Place the file in the <code>./fonts</code>
+                directory.</li>
+            <li>Modify the path to use a different font.</li>
+        </ul>
+        <h3 id="customization">Customization</h3>
+        <ul>
+            <li>Adjust font size, text placement (<code>rect</code>), and line height to customize the appearance of the
+                text overlay.</li>
+        </ul>
+        <h3 id="example-images">Example Images</h3>
+        <p>Use a sample image and payload to generate overlays with text for testing.</p>
+        <hr>
+        <h2 id="troubleshooting">Troubleshooting</h2>
+        <h3 id="common-errors">Common Errors</h3>
+        <ul>
+            <li><strong>Font Not Found:</strong> Ensure the <code>Quicksand-Regular.ttf</code> font file is placed in
+                the correct directory.</li>
+            <li><strong>Invalid Image URL:</strong> Verify the URL provided for <code>image_url</code> is accessible and
+                points to a valid image.</li>
+        </ul>
+
+    </div>
+</body>
+
+</html>
