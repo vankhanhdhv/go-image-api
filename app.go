@@ -124,18 +124,18 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 
 	img, err := imaging.Decode(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode image: %v", err)
+		return nil, fmt.Errorf("Failed to decode image: %v", err)
 	}
 
 	rgba := imaging.Clone(img)
 
 	fontBytes, err := os.ReadFile("./fonts/Quicksand-Regular.ttf")
 	if err != nil {
-		return nil, fmt.Errorf("failed to load font: %v", err)
+		return nil, fmt.Errorf("Failed to load font: %v", err)
 	}
 	fontParsed, err := truetype.Parse(fontBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse font: %v", err)
+		return nil, fmt.Errorf("Failed to parse font: %v", err)
 	}
 
 	for _, content := range req.Contents {
