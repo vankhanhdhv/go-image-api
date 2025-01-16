@@ -1,10 +1,10 @@
 # Text Overlay Image API
 
-This project provides an HTTP API to overlay text onto images with customizations for font size, line height, and placement. The API allows you to create images with text content dynamically.
+This project provides an HTTP API to overlay text onto images with customizations for font size, line height, font weight, and placement. The API allows you to create images with text content dynamically.
 
 ## Features
 - Accepts an image URL and text content with styling parameters.
-- Allows customization of font size, line height, and text placement.
+- Allows customization of font size, line height, font weight, and text placement.
 - Outputs the generated image as a PNG file.
 
 ## API Documentation
@@ -22,22 +22,24 @@ This project provides an HTTP API to overlay text onto images with customization
       "font_size": "float",
       "rect": [x1, y1, x2, y2],
       "line_height": "float",
-      "color": "hex"
+      "color": "hex",
+      "font_weight": "string"
     }
   ]
 }
 ```
 
 ### Parameters
-| Parameter    | Type     | Description                                                                                     |
-|--------------|----------|-------------------------------------------------------------------------------------------------|
-| `image_url`  | `string` | URL of the base image to be used.                                                              |
-| `contents`   | `array`  | An array of text content objects for overlay.                                                  |
-| `text`       | `string` | The text to overlay on the image.                                                              |
-| `font_size`  | `float`  | The font size for the text (e.g., `12.5`).                                                     |
-| `rect`       | `array`  | A rectangle `[x1, y1, x2, y2]` specifying the text area (top-left and bottom-right coordinates).|
-| `line_height`| `float`  | Line height multiplier for text spacing (e.g., `1.5`).                                         |
-| `color`      | `hex`    | Hexadecimal color code for the text (e.g., `#FFFFFF`).                                         |
+| Parameter     | Type     | Description                                                                                     |
+|---------------|----------|-------------------------------------------------------------------------------------------------|
+| `image_url`   | `string` | URL of the base image to be used.                                                              |
+| `contents`    | `array`  | An array of text content objects for overlay.                                                  |
+| `text`        | `string` | The text to overlay on the image.                                                              |
+| `font_size`   | `float`  | The font size for the text (e.g., `12.5`).                                                     |
+| `rect`        | `array`  | A rectangle `[x1, y1, x2, y2]` specifying the text area (top-left and bottom-right coordinates).|
+| `line_height` | `float`  | Line height multiplier for text spacing (e.g., `1.5`).                                         |
+| `color`       | `hex`    | Hexadecimal color code for the text (e.g., `#FFFFFF`).                                         |
+| `font_weight` | `string` | Font weight for the text (e.g., `normal`, `bold`, `500`, `700`).                               |
 
 ### Example Request
 ```json
@@ -49,7 +51,16 @@ This project provides an HTTP API to overlay text onto images with customization
       "font_size": 20.0,
       "rect": [50, 100, 400, 200],
       "line_height": 1.5,
-      "color": "#000000"
+      "color": "#000000",
+      "font_weight": "bold"
+    },
+    {
+      "text": "Subtitle",
+      "font_size": 16.0,
+      "rect": [50, 220, 400, 260],
+      "line_height": 1.2,
+      "color": "#FF5733",
+      "font_weight": "500"
     }
   ]
 }
@@ -82,7 +93,10 @@ This project provides an HTTP API to overlay text onto images with customization
 
 ### Setup
 1. Clone the repository.
-2. Place the required font file in `./fonts/Quicksand-Regular.ttf`.
+2. Place the required font files in the `./fonts` directory:
+   - `Quicksand-Regular.ttf`
+   - `Quicksand-Bold.ttf`
+   - `Quicksand-Medium.ttf`
 3. Run the application:
    ```bash
    go run main.go
@@ -94,11 +108,11 @@ This project provides an HTTP API to overlay text onto images with customization
 ## Additional Information
 
 ### Fonts
-- The application requires a `.ttf` font file. Place the file in the `./fonts` directory.
-- Modify the path to use a different font.
+- The application requires `.ttf` font files. Place the files in the `./fonts` directory.
+- Font weights are dynamically selected based on the `font_weight` parameter in the request.
 
 ### Customization
-- Adjust font size, text placement (`rect`), and line height to customize the appearance of the text overlay.
+- Adjust font size, text placement (`rect`), line height, and font weight to customize the appearance of the text overlay.
 
 ### Example Images
 Use a sample image and payload to generate overlays with text for testing.
@@ -108,5 +122,5 @@ Use a sample image and payload to generate overlays with text for testing.
 ## Troubleshooting
 
 ### Common Errors
-- **Font Not Found:** Ensure the `Quicksand-Regular.ttf` font file is placed in the correct directory.
+- **Font Not Found:** Ensure all required font files (`Quicksand-Regular.ttf`, `Quicksand-Bold.ttf`, `Quicksand-Medium.ttf`) are placed in the correct directory.
 - **Invalid Image URL:** Verify the URL provided for `image_url` is accessible and points to a valid image.

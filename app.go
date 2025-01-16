@@ -25,6 +25,7 @@ type Content struct {
 	Rect       [4]int  `json:"rect"`
 	LineHeight float64 `json:"line_height"`
 	Color      string  `json:"color"`
+	FontWeight string  `json:"font_weight"`
 }
 
 type GenerateRequest struct {
@@ -68,7 +69,6 @@ func hexToColor(hex string) color.Color {
 	if strings.HasPrefix(hex, "#") {
 		hex = hex[1:]
 	}
-
 	var r, g, b uint8
 	switch len(hex) {
 	case 3:
@@ -88,7 +88,6 @@ func WrapText(text string, fontFace font.Face, maxWidth int) string {
 	if len(text) == 0 {
 		return ""
 	}
-
 	var wrappedText string
 	words := strings.Fields(text)
 	currentLine := ""
@@ -129,16 +128,23 @@ func GenerateImage(req GenerateRequest) ([]byte, error) {
 
 	rgba := imaging.Clone(img)
 
-	fontBytes, err := os.ReadFile("./fonts/Quicksand-Regular.ttf")
-	if err != nil {
-		return nil, fmt.Errorf("Failed to load font: %v", err)
-	}
-	fontParsed, err := truetype.Parse(fontBytes)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse font: %v", err)
-	}
-
 	for _, content := range req.Contents {
+		fontPath := "./fonts/Quicksand-Regular.ttf"
+		switch strings.ToLower(content.FontWeight) {
+		case "bold", "700":
+			fontPath = "./fonts/Quicksand-Bold.ttf"
+		case "500":
+			fontPath = "./fonts/Quicksand-Medium.ttf"
+		}
+
+		fontBytes, err := os.ReadFile(fontPath)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load font: %v", err)
+		}
+		fontParsed, err := truetype.Parse(fontBytes)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to parse font: %v", err)
+		}
 		fontFace := truetype.NewFace(fontParsed, &truetype.Options{Size: content.FontSize})
 		rect := image.Rect(content.Rect[0], content.Rect[1], content.Rect[2], content.Rect[3])
 		textColor := hexToColor(content.Color)
