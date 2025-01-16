@@ -15,5 +15,6 @@ ENV VERSION=$DOCKER_METADATA_OUTPUT_VERSION
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/main /app/go-image-api
 COPY --from=builder /app/fonts /app/fonts
+COPY --from=builder /app/index.html /app/index.html
 EXPOSE 8080
 ENTRYPOINT [ "/app/go-image-api" ]
