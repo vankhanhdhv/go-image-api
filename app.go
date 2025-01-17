@@ -66,9 +66,7 @@ func DrawTextWithLineHeight(img draw.Image, rect image.Rectangle, text string, f
 }
 
 func hexToColor(hex string) color.Color {
-	if strings.HasPrefix(hex, "#") {
-		hex = hex[1:]
-	}
+	hex = strings.TrimPrefix(hex, "#")
 	var r, g, b uint8
 	switch len(hex) {
 	case 3:
